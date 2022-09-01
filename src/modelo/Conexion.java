@@ -26,7 +26,7 @@ public class Conexion {
         try{
             Class.forName(jdbc);
             conexionBD = DriverManager.getConnection(urlConexion,usr,contra);
-            JOptionPane.showMessageDialog(null, "Conexion Exitosa...!","Exito",JOptionPane.INFORMATION_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "Conexion Exitosa...!","Exito",JOptionPane.INFORMATION_MESSAGE);
             
         }
         catch(HeadlessException | ClassNotFoundException | SQLException ex){

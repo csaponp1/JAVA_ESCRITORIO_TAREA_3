@@ -3,6 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package modelo;
+import java.awt.HeadlessException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.table.DefaultTableModel;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -10,16 +17,23 @@ package modelo;
  */
 public class Cliente extends Persona {
     private String nit; 
-    
+    Conexion cn;
+    private int id;
     public Cliente(){};
-    
-
-    public Cliente(String nit, String nombres, String apellidos, String direccion, String telefono, String fecha_nacimiento) {
+    public Cliente(int id,String nit, String nombres, String apellidos, String direccion, String telefono, String fecha_nacimiento) {
         super(nombres, apellidos, direccion, telefono, fecha_nacimiento);
+        this.id=id;
         this.nit = nit;
+        
     }
     
-    
+     public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getNit() {
         return nit;
@@ -29,17 +43,116 @@ public class Cliente extends Persona {
         this.nit = nit;
     }
     
+    public DefaultTableModel leer(){
+      DefaultTableModel tabla = new DefaultTableModel();
+      try{
+          cn = new Conexion();
+          cn.abrir_conexion();
+            String query;
+            query = "SELECT id_cliente as id,nit,nombres,apellidos,direccion,telefono,fecha_nacimiento FROM clientes;";
+            ResultSet consulta = cn.conexionBD.createStatement().executeQuery(query);
+            String encabezado[] = {"id","nit","nombres","apellidos","direccion","telefono","nacimiento"};
+            tabla.setColumnIdentifiers(encabezado);
+            String datos[] = new String[7];
+            
+            while(consulta.next()){
+                datos[0]=consulta.getString("id");
+                datos[1]=consulta.getString("nit");
+                datos[2]=consulta.getString("nombres");
+                datos[3]=consulta.getString("apellidos");
+                datos[4]=consulta.getString("direccion");
+                datos[5]=consulta.getString("telefono");
+                datos[6]=consulta.getString("fecha_nacimiento");
+                tabla.addRow(datos);
+            }
+          cn.cerrar_conexion();
+
+      }catch(SQLException ex){
+
+           System.out.println("error" + ex.getMessage());
+      }
+
+      return tabla;
+  }
+    
     @Override
     public void agregar(){
-        System.out.println("Nit: "+ getNit());
-        System.out.println("Nombres: "+ this.getNombres());
-        System.out.println("Apellidos: "+ this.getApellidos());
-        System.out.println("Direccion: "+ this.getDireccion());
-        System.out.println("Telefono: "+ this.getTelefono());
-        System.out.println("Fecha de nacimiento: "+ this.getFecha_nacimiento());
+        try{
+            
+            PreparedStatement parametro;
+            cn = new Conexion();
+            cn.abrir_conexion();
+            String query;
+            query = "INSERT INTO clientes (nit,nombres,apellidos,direccion,telefono,fecha_nacimiento) VALUES (?,?,?,?,?,?);";
+            parametro = (PreparedStatement)cn.conexionBD.prepareStatement(query);
+            parametro.setString(1, getNit());
+            parametro.setString(2, getNombres());
+            parametro.setString(3, getApellidos());
+            parametro.setString(4, getDireccion());
+            parametro.setString(5, getTelefono());
+            parametro.setString(6, getFecha_nacimiento());
+            int ejecutar = parametro.executeUpdate();
+            cn.cerrar_conexion();
+            JOptionPane.showMessageDialog(null, Integer.toString(ejecutar)+" REGISTRO(S) INGRESADO(S)","mensaje",JOptionPane.INFORMATION_MESSAGE);
+                
+        }
+        
+        catch(HeadlessException | SQLException ex){
+            System.out.println("error"+ex.getMessage());
+        }
         
     }
+
+    @Override
+    public void actualizar(){
+          try{
+            
+            PreparedStatement parametro;
+            cn = new Conexion();
+            cn.abrir_conexion();
+            String query;
+            query = "update clientes set nit=? ,nombres=?,apellidos=?,direccion=?,telefono=?,fecha_nacimiento=? "+
+                    "where id_cliente=?;";
+            parametro = (PreparedStatement)cn.conexionBD.prepareStatement(query);
+            parametro.setString(1, getNit());
+            parametro.setString(2, getNombres());
+            parametro.setString(3, getApellidos());
+            parametro.setString(4, getDireccion());
+            parametro.setString(5, getTelefono());
+            parametro.setString(6, getFecha_nacimiento());
+            parametro.setInt(7, getId());
+            int ejecutar = parametro.executeUpdate();
+            cn.cerrar_conexion();
+            JOptionPane.showMessageDialog(null, Integer.toString(ejecutar)+" REGISTRO(S) ACTUALIZADO(S)","mensaje",JOptionPane.INFORMATION_MESSAGE);
+                
+        }
+        
+        catch(HeadlessException | SQLException ex){
+            System.out.println("error"+ex.getMessage());
+        }
+    }
     
-    
+    @Override
+    public void eliminar(){
+        
+        try{
+            PreparedStatement parametro;
+            cn = new Conexion();
+            cn.abrir_conexion();
+            String query;
+            query = "delete from clientes where id_cliente = ?;";
+                    
+            parametro = (PreparedStatement)cn.conexionBD.prepareStatement(query);
+            parametro.setInt(1, getId());
+            int ejecutar = parametro.executeUpdate();
+            cn.cerrar_conexion();
+            JOptionPane.showMessageDialog(null, Integer.toString(ejecutar)+" REGISTRO(S) ELIMINADO(S)","mensaje",JOptionPane.WARNING_MESSAGE);
+                
+        }
+        
+        catch(HeadlessException | SQLException ex){
+            System.out.println("XXX error XXX NO se puedE eL!min@r"+ex.getMessage());
+        }
+    }
     
 }

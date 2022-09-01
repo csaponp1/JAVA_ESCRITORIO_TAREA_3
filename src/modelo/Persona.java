@@ -65,7 +65,7 @@ abstract class Persona {
     }
     
     protected void agregar(){}
-    protected void modificar(){}
+    protected void actualizar(){}
     protected void eliminar(){}
 
    
